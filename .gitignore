@@ -1,0 +1,18 @@
+# Source media, not needed to serve the site.
+# 384 MB: the raw frame sequence, the render exports and the show-villa
+# originals. site/build-assets.sh regenerates everything in site/assets
+# from this folder, so keep a local copy.
+input Assets/
+New folder/
+
+# OS / editor
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+.vscode/
+.idea/
+
+# Local captures and scratch
+*.log

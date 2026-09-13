@@ -1,0 +1,621 @@
+/* ============================================================
+   MIRVANA LAND
+   Exaggerated Minimalism. One typeface (Host Grotesk), weight and
+   scale carry the whole hierarchy. Ivory ground, one accent.
+   Radius lock: 0. Z-index scale: 10 / 20 / 30 / 50.
+   ============================================================ */
+
+:root {
+  /* Ground */
+  --ivory:      #F4F1EA;
+  --ivory-2:    #EAE5DA;
+  --ivory-3:    #FAF8F3;
+
+  /* Ink */
+  --ink:        #17150F;
+  --ink-2:      #55503F;
+  /* Darkened from #8A8271: at 11px the old value measured 3.03:1 on
+     the alt ground, under the 4.5:1 floor. Now 4.7:1. */
+  --ink-3:      #6B6353;
+
+  --line:       #D5CEC0;
+
+  /* The single accent. Nothing else is allowed to be a colour.
+     Darkened from #C0552C so white button text clears 4.5:1 (5.2:1). */
+  --accent:     #B34E27;
+  --accent-d:   #93401F;
+
+  /* Closing act */
+  --night:      #121009;
+  --night-2:    #1C1811;
+  --night-line: #383022;
+
+  --font: "Host Grotesk", "Helvetica Neue", Arial, system-ui, sans-serif;
+
+  /* Scale */
+  /* Scaled back from 9rem / 5rem. The copy now carries information
+     rather than short slogans, and informative headlines at the old
+     size ran to four lines. */
+  --type-giant: clamp(2.6rem, 1.1rem + 5.2vw, 6.4rem);
+  --type-big:   clamp(2rem, 1.1rem + 3.2vw, 4rem);
+  --type-mid:   clamp(1.5rem, 1.1rem + 1.7vw, 2.35rem);
+
+  --pad: clamp(6rem, 12vw, 13rem);
+  --gut: clamp(1.25rem, 4.5vw, 5rem);
+
+  --z-base: 10;
+  --z-over: 20;
+  --z-nav:  30;
+  --z-top:  50;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --micro: 200ms;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--font);
+  font-weight: 400;
+  font-size: 1.0625rem;           /* >=16px on mobile */
+  line-height: 1.65;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+}
+img, video { display: block; max-width: 100%; }
+a { color: inherit; }
+h1, h2, h3, p, figure { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+main { overflow-x: hidden; width: 100%; max-width: 100%; }
+
+.shell { width: 100%; max-width: 1440px; margin-inline: auto; padding-inline: var(--gut); }
+
+/* ---------- Type ---------- */
+.giant {
+  font-size: var(--type-giant);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+.big {
+  font-size: var(--type-big);
+  font-weight: 700;
+  line-height: 1.0;
+  letter-spacing: -0.038em;
+  text-wrap: balance;
+}
+.mid {
+  font-size: var(--type-mid);
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+}
+.body {
+  color: var(--ink-2);
+  max-width: 68ch;                /* 65 to 75 char measure */
+  font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  line-height: 1.7;
+}
+.label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ink-3);
+}
+
+/* ---------- Nav ---------- */
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: var(--z-nav);
+  height: 76px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid transparent;
+  transition: background var(--micro) var(--ease), border-color var(--micro) var(--ease);
+}
+.nav::before {
+  content: "";
+  position: absolute; inset: 0 0 auto 0; height: 150px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(8,7,4,0.58) 0%, rgba(8,7,4,0.20) 58%, rgba(8,7,4,0) 100%);
+  transition: opacity 300ms var(--ease);
+}
+.nav.is-solid::before, .nav.is-dark::before { opacity: 0; }
+.nav.is-solid { background: color-mix(in srgb, var(--ivory) 90%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom-color: var(--line); }
+.nav.is-dark  { background: color-mix(in srgb, var(--night) 92%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom-color: var(--night-line); }
+
+.nav__in {
+  position: relative; z-index: var(--z-base);
+  width: 100%; max-width: 1440px; margin-inline: auto;
+  padding-inline: var(--gut);
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+}
+.nav__logo { display: flex; align-items: center; gap: 0.7rem; text-decoration: none; min-height: 44px; }
+.nav__logo img { height: 30px; width: auto; transition: filter 300ms var(--ease); }
+.nav.is-solid .nav__logo img { filter: brightness(0) saturate(100%) invert(6%) sepia(13%) saturate(900%) hue-rotate(8deg) brightness(95%) contrast(93%); }
+.nav__word { font-weight: 700; font-size: 0.9375rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ivory); transition: color 300ms var(--ease); }
+.nav.is-solid .nav__word { color: var(--ink); }
+
+.nav__links { display: flex; align-items: center; gap: clamp(0.75rem, 2vw, 2.25rem); }
+.nav__links a {
+  display: inline-flex; align-items: center;
+  min-height: 44px; padding-inline: 0.25rem;   /* 44px touch target */
+  font-size: 0.8125rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  text-decoration: none; color: var(--ivory); opacity: 0.8;
+  transition: opacity var(--micro) var(--ease), color 300ms var(--ease);
+  white-space: nowrap;
+}
+.nav.is-solid .nav__links a { color: var(--ink); opacity: 0.68; }
+.nav.is-dark  .nav__links a { color: var(--ivory); opacity: 0.8; }
+.nav__links a:hover { opacity: 1; }
+.nav__cta {
+  opacity: 1 !important;
+  background: var(--accent); color: #FFFFFF !important;
+  padding: 0 1.35rem !important;
+  font-weight: 600 !important; letter-spacing: 0.12em !important;
+  transition: background var(--micro) var(--ease);
+}
+.nav__cta:hover { background: var(--accent-d); }
+@media (max-width: 860px) { .nav__links a:not(.nav__cta) { display: none; } }
+@media (max-width: 460px) { .nav__word { display: none; } }
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.nav .nav__cta:focus-visible, .nav.is-dark a:focus-visible { outline-color: #FFFFFF; }
+
+/* ---------- Hero ---------- */
+.hero { position: relative; background: var(--night); }
+.hero__stage { position: relative; height: 100svh; width: 100%; overflow: hidden; }
+.hero__media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 45%; }
+.hero__scrim {
+  position: absolute; inset: 0; pointer-events: none; z-index: var(--z-base);
+  background:
+    linear-gradient(to top, rgba(8,7,4,0.88) 0%, rgba(8,7,4,0.62) 26%, rgba(8,7,4,0.18) 54%, rgba(8,7,4,0) 74%),
+    linear-gradient(to bottom, rgba(8,7,4,0.62) 0%, rgba(8,7,4,0.2) 13%, rgba(8,7,4,0) 26%);
+}
+.hero__beats { position: absolute; inset: auto 0 0 0; z-index: var(--z-over); padding-bottom: clamp(5rem, 13vh, 9rem); }
+.hero__beatgrid { display: grid; }
+.hero__beat {
+  grid-area: 1 / 1;
+  /* The beats carry real information now rather than a short slogan,
+     so they get a wider measure and a lower cap than the section
+     display type: informative lines at 9rem ran to four lines. */
+  max-width: min(94vw, 72rem);
+  opacity: 0;
+  will-change: opacity, transform;
+}
+.hero__beat p {
+  font-size: clamp(2.2rem, 1rem + 5.4vw, 6.4rem);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  color: var(--ivory);
+  text-wrap: balance;
+}
+.hero__sub {
+  margin-top: 1.5rem;
+  color: var(--ivory); opacity: 0.72;
+  font-size: 0.8125rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.18em; line-height: 1.9;
+}
+
+/* Chapter markers, from the scroll-storytelling pattern */
+.hero__chapters {
+  position: absolute; z-index: var(--z-over);
+  left: var(--gut); right: var(--gut);
+  bottom: clamp(1.75rem, 4.5vh, 3rem);
+  display: flex; gap: clamp(0.75rem, 2vw, 1.5rem);
+}
+.chap { flex: 1; display: grid; gap: 0.6rem; }
+.chap__bar { height: 2px; background: rgba(244,241,234,0.22); overflow: hidden; }
+.chap__bar i { display: block; height: 100%; width: 0%; background: var(--ivory); }
+.chap__n {
+  font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.2em;
+  color: rgba(244,241,234,0.5);
+  transition: color var(--micro) var(--ease);
+}
+.chap.is-on .chap__n { color: var(--ivory); }
+
+/* ---------- Sections ---------- */
+.sec { padding-block: var(--pad); position: relative; }
+.sec--alt { background: var(--ivory-2); }
+.reveal { opacity: 0; transform: translateY(30px); }
+.imgwrap { overflow: hidden; position: relative; background: var(--ivory-2); }
+.imgwrap img, .imgwrap video { width: 100%; height: 100%; object-fit: cover; will-change: transform; }
+
+/* 1. Plain-pied : statement type, offset image */
+.stmt__grid { display: grid; gap: clamp(2.5rem, 5vw, 4.5rem); }
+@media (min-width: 980px) { .stmt__grid { grid-template-columns: 1.25fr 1fr; align-items: end; } }
+.stmt__media { aspect-ratio: 5 / 4; }
+@media (min-width: 980px) { .stmt__media { margin-bottom: 0.5rem; } }
+.stmt__copy .body { margin-top: 2rem; }
+
+/* 2. Sans vis-a-vis : the numeral is the image */
+.vav { display: grid; gap: clamp(2.5rem, 5vw, 5rem); }
+@media (min-width: 980px) { .vav { grid-template-columns: 1fr 1.1fr; align-items: stretch; gap: clamp(3rem, 6vw, 7rem); } }
+.vav__media { aspect-ratio: 3 / 4; }
+/* Stretch rather than centre, so the media matches the copy column
+   instead of floating in it with dead space above and below. */
+@media (min-width: 980px) { .vav__media { aspect-ratio: auto; min-height: 34rem; } }
+.numeral {
+  font-size: clamp(7rem, 4rem + 16vw, 20rem);
+  font-weight: 800; line-height: 0.82; letter-spacing: -0.06em;
+  color: var(--accent);
+}
+.vav__copy .big { margin-top: 1rem; }
+.vav__copy .body { margin-top: 1.75rem; }
+
+/* 3. La villa : full bleed, headline over image */
+.villa { position: relative; padding-block: 0; }
+.villa__media { height: clamp(70vh, 88vh, 92vh); }
+.villa__media::after {
+  content: ""; position: absolute; inset: 0; z-index: var(--z-base);
+  /* Weighted hard at the bottom: the headline and the three notes all
+     sit in the lower third, and at the old 0.44 midpoint the small
+     text was sitting on open image. */
+  background: linear-gradient(to top, rgba(8,7,4,0.95) 0%, rgba(8,7,4,0.88) 26%, rgba(8,7,4,0.62) 48%, rgba(8,7,4,0.18) 74%, rgba(8,7,4,0) 100%);
+}
+.villa__over {
+  position: absolute; z-index: var(--z-over);
+  left: 0; right: 0; bottom: clamp(3rem, 7vw, 6rem);
+}
+.villa__over h2 { color: var(--ivory); max-width: 18ch; }
+.villa__notes { display: grid; gap: clamp(1.75rem, 3vw, 3rem); margin-top: clamp(2.5rem, 5vw, 4rem); }
+@media (min-width: 820px) { .villa__notes { grid-template-columns: repeat(3, 1fr); } }
+.vnote { border-top: 1px solid rgba(244,241,234,0.42); padding-top: 1.1rem; }
+.vnote h3 { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.015em; color: var(--ivory); }
+/* Raised from 0.7 alpha and 0.9375rem, plus a shadow, so the notes
+   stay legible wherever the image happens to be bright. */
+.vnote p {
+  margin-top: 0.5rem;
+  font-size: 1rem; line-height: 1.7;
+  color: rgba(250,248,243,0.92);
+  text-shadow: 0 1px 12px rgba(8,7,4,0.75);
+}
+.villa__over h2 { text-shadow: 0 2px 30px rgba(8,7,4,0.5); }
+
+/* 4. Le village */
+.grid5 { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: clamp(2.5rem, 5vw, 4rem); }
+/* Six tracks so five cells tile cleanly: three of 2, then two of 3.
+   No empty cell at any breakpoint. */
+@media (min-width: 720px)  { .grid5 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1060px) {
+  .grid5 { grid-template-columns: repeat(6, 1fr); }
+  .grid5 .cell { grid-column: span 2; }
+  .grid5 .cell:nth-child(4), .grid5 .cell:nth-child(5) { grid-column: span 3; }
+}
+.cell {
+  background: var(--ivory); position: relative;
+  min-height: clamp(15rem, 25vw, 20rem);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: clamp(1.35rem, 2.2vw, 2rem);
+  overflow: hidden;
+}
+.cell--img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 600ms var(--ease); }
+.cell--img::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(8,7,4,0.92) 0%, rgba(8,7,4,0.64) 34%, rgba(8,7,4,0.2) 64%, rgba(8,7,4,0) 88%);
+}
+.cell--img:hover img { transform: scale(1.04); }
+.cell--txt { background: var(--ivory-3); }
+.cell__t { position: relative; z-index: var(--z-base); }
+.cell__t h3 { font-size: clamp(1.15rem, 1rem + 0.5vw, 1.4rem); font-weight: 700; letter-spacing: -0.022em; line-height: 1.15; }
+.cell__t p { margin-top: 0.45rem; font-size: 0.875rem; line-height: 1.6; }
+.cell--img .cell__t h3 { color: var(--ivory); }
+.cell--img .cell__t p { color: rgba(244,241,234,0.78); }
+.cell--txt .cell__t p { color: var(--ink-2); }
+
+/* 5. Preuve et prix */
+.proof { display: grid; gap: clamp(2.5rem, 5vw, 4.5rem); align-items: start; margin-top: clamp(2.5rem, 5vw, 4rem); }
+@media (min-width: 980px) { .proof { grid-template-columns: 1.05fr 0.95fr; } }
+.facts { margin-top: 0; }
+.fact { display: grid; grid-template-columns: 10.5rem 1fr; gap: 1.25rem; align-items: baseline; padding: 1.05rem 0; border-bottom: 1px solid var(--line); }
+.fact:first-child { border-top: 1px solid var(--line); }
+@media (max-width: 620px) { .fact { grid-template-columns: 1fr; gap: 0.4rem; } }
+.fact dt {
+  display: flex; align-items: center; gap: 0.6rem;
+  font-size: 0.6875rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.18em; color: var(--ink-3);
+}
+.fact__i { width: 17px; height: 17px; flex: none; color: var(--accent); }
+.fact dd { margin: 0; font-size: 1.0625rem; font-weight: 500; letter-spacing: -0.015em; }
+/* Edge to edge, 4:3, sitting under the price. */
+.proof__band {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  aspect-ratio: 4 / 3;
+  margin-top: clamp(3.5rem, 7vw, 6rem);
+}
+@media (max-width: 700px) { .proof__band { aspect-ratio: 4 / 3.4; } }
+
+/* The price is the exaggerated-minimalism moment */
+.price { margin-top: clamp(3rem, 6vw, 5rem); }
+.price__lead { max-width: 24ch; }
+.price__fig {
+  margin-top: 1.5rem;
+  font-size: clamp(3rem, 1.5rem + 7vw, 8.5rem);
+  font-weight: 800; line-height: 0.9; letter-spacing: -0.05em;
+  color: var(--accent);
+}
+.price__from { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 0.9rem; }
+.price__note { margin-top: 1.5rem; max-width: 46ch; color: var(--ink-2); font-size: 0.9375rem; }
+
+/* 6. Contact */
+.contact { background: var(--night); color: var(--ivory); }
+.contact .label { color: rgba(244,241,234,0.62); }
+.contact__grid { display: grid; gap: clamp(3rem, 6vw, 5.5rem); align-items: start; }
+@media (min-width: 1000px) { .contact__grid { grid-template-columns: 0.8fr 1.2fr; } .contact__side { position: sticky; top: 118px; } }
+.contact h2 { color: var(--ivory); }
+.contact__intro { margin-top: 1.5rem; color: rgba(244,241,234,0.72); max-width: 36ch; }
+.contact__aside { margin-top: 2.25rem; padding-top: 1.75rem; border-top: 1px solid var(--night-line); }
+.contact__aside p { color: rgba(244,241,234,0.56); font-size: 0.875rem; line-height: 1.75; }
+
+.form { display: grid; gap: 1.5rem; }
+.row { display: grid; gap: 1.5rem; }
+@media (min-width: 640px) { .row--2 { grid-template-columns: 1fr 1fr; } }
+.field { display: grid; gap: 0.5rem; }
+.field > label { font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.18em; color: rgba(244,241,234,0.78); }
+.field input, .field select, .field textarea {
+  width: 100%; min-height: 52px;              /* comfortably over 44px */
+  background: var(--night-2);
+  border: 1px solid var(--night-line);
+  border-radius: 0;
+  padding: 0.85rem 1rem;
+  color: var(--ivory);
+  font-size: 1rem; font-weight: 400;
+  transition: border-color var(--micro) var(--ease), background var(--micro) var(--ease);
+  appearance: none;
+}
+.field textarea { resize: vertical; min-height: 7rem; line-height: 1.6; }
+.field select {
+  cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, rgba(244,241,234,0.6) 50%), linear-gradient(135deg, rgba(244,241,234,0.6) 50%, transparent 50%);
+  background-position: calc(100% - 20px) center, calc(100% - 14px) center;
+  background-size: 6px 6px, 6px 6px; background-repeat: no-repeat;
+  padding-right: 3rem;
+}
+.field select option { background: var(--night-2); color: var(--ivory); }
+.field input::placeholder, .field textarea::placeholder { color: rgba(244,241,234,0.4); }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); background: #221B12; }
+.field .err { font-size: 0.75rem; color: #F0997C; min-height: 1.1em; display: none; }
+.field.is-bad input, .field.is-bad select { border-color: #F0997C; }
+.field.is-bad .err { display: block; }
+.hint { font-size: 0.75rem; color: rgba(244,241,234,0.58); }
+
+.submit {
+  margin-top: 0.35rem;
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.7rem;
+  min-height: 56px;
+  background: var(--accent); color: #FFFFFF;
+  border: 1px solid var(--accent); border-radius: 0;
+  padding: 1rem 2rem;
+  font-size: 0.8125rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.16em;
+  cursor: pointer; white-space: nowrap;
+  transition: background var(--micro) var(--ease);
+}
+.submit:hover { background: var(--accent-d); border-color: var(--accent-d); }
+.submit[disabled] { opacity: 0.5; cursor: default; }
+.submit svg { width: 16px; height: 16px; fill: currentColor; flex: none; }
+
+.done { display: none; }
+.done.is-on { display: block; }
+.form.is-off { display: none; }
+.done h3 { font-size: var(--type-big); font-weight: 800; line-height: 0.98; letter-spacing: -0.04em; color: var(--ivory); }
+.done p { margin-top: 1.25rem; color: rgba(244,241,234,0.68); max-width: 42ch; }
+.relink {
+  display: inline-flex; align-items: center; min-height: 44px; margin-top: 1.5rem;
+  color: var(--accent); font-size: 0.75rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.18em; text-decoration: none;
+  border-bottom: 1px solid currentColor;
+}
+
+/* ---------- Footer ---------- */
+.foot { background: var(--night); color: rgba(244,241,234,0.55); padding-block: clamp(3rem, 6vw, 4.5rem); border-top: 1px solid var(--night-line); }
+.foot__in { display: flex; flex-wrap: wrap; gap: 1.75rem 3rem; align-items: center; justify-content: space-between; }
+.foot img { height: 62px; width: auto; }
+.foot__meta { display: flex; flex-wrap: wrap; gap: 0.4rem 2rem; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; }
+.foot__meta a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; transition: color var(--micro) var(--ease); }
+.foot__meta a:hover { color: var(--ivory); }
+.foot__loc { gap: 0.55rem; }
+.foot__loc svg { width: 15px; height: 15px; flex: none; color: var(--accent); }
+
+/* ---------- Reduced motion ---------- */
+/* The site ships full motion for every visitor by decision of the
+   owner, so <html> carries .motion-full unless ?motion=reduced is
+   passed. Everything below is therefore scoped to the opt-out. */
+@media (prefers-reduced-motion: reduce) {
+  html:not(.motion-full) { scroll-behavior: auto; }
+  html:not(.motion-full) .reveal { opacity: 1 !important; transform: none !important; }
+  /* These hero overrides are the no-JS / no-GSAP fallback only. When
+     the scrub engages, JS stamps .js-scrub on <html> and the pinned
+     hero runs as normal, because it is scroll-linked rather than
+     autonomous. Decorative motion below stays disabled either way. */
+  html:not(.js-scrub) .hero__stage { height: auto; min-height: 100svh; }
+  html:not(.js-scrub) .hero__beats {
+    /* relative, not static: static drops the z-index and the scrim
+       paints over the copy instead of under it. */
+    position: relative;
+    inset: auto;
+    padding-top: 44vh; padding-bottom: 4rem;
+    background: linear-gradient(to bottom, rgba(8,7,4,0) 0%, rgba(8,7,4,0.52) 16%, rgba(8,7,4,0.84) 42%, rgba(8,7,4,0.92) 100%);
+  }
+  html:not(.js-scrub) .hero__beat { grid-area: auto; opacity: 1 !important; transform: none !important; max-width: min(94vw, 44rem); }
+  html:not(.js-scrub) .hero__beatgrid { gap: clamp(1.5rem, 4vw, 2.5rem); }
+  html:not(.js-scrub) .hero__beat:not(:first-child) p { font-size: var(--type-big); }
+  html:not(.js-scrub) .hero__chapters { display: none; }
+  html:not(.motion-full) .cell--img img,
+  html:not(.motion-full) .cell--img:hover img { transition: none; transform: none; }
+}
+
+/* ============================================================
+   Motion primitives
+   ============================================================ */
+
+/* Word-mask reveal. Each word gets its own clipping box, so the
+   effect works line by line without measuring line boxes. The
+   padding/negative-margin pair stops descenders (g j p q y) from
+   being clipped by the mask. */
+[data-split] { }
+.w {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
+}
+.wi { display: inline-block; will-change: transform; }
+
+/* Parallax and push-in share one transform, written by a single
+   tween, so they can never fight over the same property. */
+[data-par] img, [data-par] video { will-change: transform; }
+
+/* Nav retracts on the way down, returns on the way up. */
+.nav { transform: translateY(0); transition: transform 420ms var(--ease), background var(--micro) var(--ease), border-color var(--micro) var(--ease); }
+.nav.is-tucked { transform: translateY(-102%); }
+
+/* Lenis */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(.motion-full) .nav.is-tucked { transform: none; }
+  html:not(.motion-full) .w { overflow: visible; padding-bottom: 0; margin-bottom: 0; }
+  html:not(.motion-full) .wi { transform: none !important; }
+}
+
+/* The price reveals rather than counts: a counting price renders wrong
+   figures on the way up, and a wrong price is not a thing to put on
+   screen even for a second. */
+.price__val { white-space: nowrap; display: inline-block; }
+
+/* ============================================================
+   Form on small screens
+   ============================================================ */
+@media (max-width: 720px) {
+  /* iOS zooms the page whenever a focused field is under 16px, which
+     then leaves the layout shifted. 17px keeps it still. */
+  .field input, .field select, .field textarea {
+    font-size: 1.0625rem;
+    min-height: 56px;
+    padding: 1rem 1.05rem;
+  }
+  .field select { padding-right: 3.25rem; background-position: calc(100% - 22px) center, calc(100% - 16px) center; }
+  .field > label { font-size: 0.6875rem; letter-spacing: 0.16em; }
+  .form { gap: 1.35rem; }
+  .row { gap: 1.35rem; }
+  /* One field per row: side-by-side inputs at phone width leave both
+     too narrow to read the value being typed. */
+  .row--2 { grid-template-columns: 1fr; }
+
+  .submit {
+    width: 100%;
+    min-height: 60px;
+    font-size: 0.8125rem;
+    letter-spacing: 0.12em;
+    padding-inline: 1rem;
+  }
+  .contact__grid { gap: 2.5rem; }
+  .contact__side { position: static; }
+  .contact__aside { margin-top: 1.75rem; padding-top: 1.5rem; }
+  .hint { font-size: 0.8125rem; }
+  .field .err { font-size: 0.8125rem; }
+}
+
+/* A field in error should pull the eye without relying on colour alone. */
+.field.is-bad input, .field.is-bad select { border-left-width: 3px; }
+
+/* Nav clears while the footage shows its own place labels. */
+.nav.is-cloaked { opacity: 0; pointer-events: none; }
+.nav { transition: transform 420ms var(--ease), opacity 380ms var(--ease), background var(--micro) var(--ease), border-color var(--micro) var(--ease); }
+.hero__chapters { transition: opacity 60ms linear; }
+
+/* ============================================================
+   WhatsApp calls to action
+   ============================================================ */
+.wa {
+  display: inline-flex; align-items: center; gap: 0.7rem;
+  margin-top: clamp(1.75rem, 3vw, 2.5rem);
+  min-height: 54px; padding: 0 1.6rem;
+  background: var(--accent); color: #FFFFFF;
+  border: 1px solid var(--accent); border-radius: 0;
+  font-size: 0.8125rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.13em;
+  text-decoration: none; white-space: nowrap;
+  transition: background var(--micro) var(--ease);
+}
+.wa:hover { background: var(--accent-d); border-color: var(--accent-d); }
+.wa:active { transform: translateY(1px); }
+.wa svg { width: 17px; height: 17px; fill: currentColor; flex: none; }
+/* Over the villa photograph the solid fill would sit heavily, so that
+   one is a light outline on the scrim instead. */
+.wa--light {
+  background: transparent; border-color: rgba(250,248,243,0.55); color: var(--ivory);
+}
+.wa--light:hover { background: var(--ivory); border-color: var(--ivory); color: var(--ink); }
+.wa-row { margin-top: clamp(2rem, 4vw, 3rem); }
+
+/* Floating button. WhatsApp green is the one place a second colour is
+   allowed: it is a recognised third-party affordance, and readers look
+   for exactly that green. Square, to hold the page's radius lock. */
+.wa-float {
+  position: fixed; z-index: var(--z-top);
+  right: clamp(1rem, 2.5vw, 2rem); bottom: clamp(1rem, 2.5vw, 2rem);
+  width: 58px; height: 58px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #1FA855; color: #FFFFFF;
+  border-radius: 0;
+  box-shadow: 0 10px 30px rgba(8,7,4,0.28);
+  transition: background var(--micro) var(--ease), transform var(--micro) var(--ease);
+}
+.wa-float svg { width: 28px; height: 28px; fill: currentColor; }
+.wa-float:hover { background: #178643; transform: translateY(-2px); }
+.wa-float:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 3px; }
+@media (max-width: 720px) { .wa-float { width: 54px; height: 54px; } }
+
+/* ============================================================
+   Villa témoin
+   ============================================================ */
+.tem__head { display: grid; gap: clamp(1.75rem, 3.5vw, 3.5rem); }
+@media (min-width: 980px) { .tem__head { grid-template-columns: 1fr 1fr; align-items: end; } }
+.tem__lede .body { max-width: 52ch; }
+
+.tem__strip {
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  display: flex; gap: clamp(0.75rem, 1.4vw, 1.25rem);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-inline: var(--gut);
+  padding-bottom: 1.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.tem__strip::-webkit-scrollbar { height: 4px; }
+.tem__strip::-webkit-scrollbar-thumb { background: var(--line); }
+.tem__item {
+  flex: 0 0 auto; margin: 0;
+  width: min(78vw, 44rem);
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  scroll-snap-align: center;
+  background: var(--ivory-2);
+}
+.tem__item img { width: 100%; height: 100%; object-fit: cover; transition: transform 700ms var(--ease); }
+.tem__item:hover img { transform: scale(1.03); }
+@media (max-width: 720px) { .tem__item { width: 86vw; aspect-ratio: 4 / 3; } }
+
+/* The strip is a horizontal scroller, so Lenis must not swallow its
+   wheel events. */
+.tem__strip { overscroll-behavior-x: contain; }
