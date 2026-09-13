@@ -4,142 +4,159 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A single-page French landing site for Mirvana Land, a development of 62
-single-storey villas near Marrakech. Static: no build step, no framework, no
-package.json. Three source files do everything — `site/index.html`,
-`site/css/mirvana.css`, `site/js/mirvana.js` — plus `serve.js` for local
-preview and `build-assets.sh` for regenerating media.
+A single-page French landing site for Mirvana Land, 62 single-storey villas
+near Marrakech. Static: no build step, no framework, no package.json, no
+runtime CDN. Everything that ships is in `site/`: `index.html`,
+`css/mirvana.css`, `css/fonts.css`, `js/mirvana.js`, and locally hosted
+vendor files (GSAP 3.12.5 + ScrollTrigger in `assets/vendor/`, Host Grotesk in
+`assets/fonts/`, a Tabler outline icon sprite in `assets/icons/features.svg`).
 
-Its job is lead *quality*, not traffic: the price is visible early to
-pre-filter budget, and the form qualifies hard before handing off to WhatsApp.
+The page exists to produce qualified leads, not traffic: the starting price is
+in the hero to pre-filter budget, and the form qualifies before handing off to
+WhatsApp. `site/README.md` is the detailed record of the current design and is
+kept up to date; read it before large changes.
 
 ## Commands
 
 ```bash
 cd site
 node serve.js . 8099          # http://localhost:8099/
-node --check js/mirvana.js    # only syntax check available
-bash build-assets.sh          # regenerate site/assets from "input Assets/"
+node --check js/mirvana.js    # the only automated check in the repo
+bash build-assets.sh          # regenerate site/assets from ../input Assets/
 ```
 
-There are no tests, no linter and no bundler. `node --check` is the only
-automated verification in the repo.
+No tests, linter or bundler exist. `?motion=reduced` on any URL turns off all
+GSAP motion, the slideshow timer and video autoplay — use it to separate
+motion bugs from layout bugs.
 
-`?motion=reduced` on any URL drops to the hero scrub with all decorative
-motion off — the fastest way to isolate whether a bug is motion-related.
+## Deployment constraint
 
-## Two constraints that silently break the hero
-
-These are the failure modes that cost the most time. Both are invisible:
-no console error, the page just looks static.
-
-**1. The host must answer HTTP `Range:` requests with `206`.** Without byte
-ranges the browser reports `video.seekable.end(0) === 0`, every
-`currentTime` assignment is ignored, and the scroll scrub does nothing while
-the page scrolls normally. This is why `serve.js` implements ranges by hand
-— do not replace it with a trivial static server. Verify any deploy with:
+Serve with **HTTP byte-range support** (`206 Partial Content`). Safari will not
+play MP4 at all without it, and other browsers cannot seek. `serve.js`
+implements ranges by hand for this reason; do not swap it for a trivial static
+server. Check a deploy with:
 
 ```bash
 curl -sI -H "Range: bytes=0-99" https://host/assets/hero/hero-scroll.mp4
 ```
 
-**2. The hero video must be encoded all-keyframe (`-g 1`).** Browsers snap a
-seek to the nearest keyframe, so a normal GOP makes only one frame in N
-reachable and the hero advances in visible jumps. `build-assets.sh` sets
-`-g 1 -keyint_min 1 -sc_threshold 0`; re-encoding with defaults brings the
-stutter straight back. Measured seek latency all-intra is about 3 ms.
+## Page structure
 
-## Hero architecture
+Section order and anchors (the nav, mobile menu and `aria-current` tracking
+all depend on these ids): `#hero` → `#plainpied` → `#temoin` → `#film` →
+`#visavis` → `#fondateur` → `#preuve` → `#village` → `#contact`.
 
-`site/js/mirvana.js` is one IIFE containing ten smaller ones. `hero()` is by
-far the most intricate; the rest are independent and safe to read alone.
+`#fondateur` presents Zied Barouni, the owner's CEO, with owner-supplied copy;
+keep his wording intact. His portrait is cropped high (`object-position` ~16%)
+so the head survives the parallax push-in; don't reuse the generic media crop.
 
-The hero has **two drive modes** that must never run at once:
+`#visavis` ends with the floor plans block (Types A–D, from
+`assets/img/plans/`). On phones it becomes a horizontal swipe row, since two
+columns shrink a plan below legibility.
 
-- **Self-play** (page load): the video autoplays and loops, and the beats,
-  chapter bars and overlay cloak are painted from `video.currentTime`
-  (`autoPaint`). `ScrollTrigger.onUpdate` returns early while `autoMode` is
-  true so the two cannot fight over the same state.
-- **Scroll-scrubbed** (after first wheel/touch/key): `endAuto()` pauses the
-  video, clears looping, and a 0.75 s `handoff` blend eases the picture from
-  where the intro left it to the scroll position rather than snapping back.
+Headings follow one pattern that the motion code relies on:
+`<h2>First line.<br><span class="heading-secondary">Second line.</span></h2>`.
 
-Timings live in two arrays near the top of `hero()`, both expressed as
-**fractions of scroll progress**, not seconds — so they survive a change of
-scroll length but *not* a re-cut of the footage:
+Icons are referenced from the sprite, never inlined:
+`<svg class="feature-icon"><use href="assets/icons/features.svg#pool"></use></svg>`.
 
-- `CHAPTERS` — the three chapter bars. Splits sit on the footage's two whip
-  transitions so motion blur covers each change of line.
-- `WINDOWS` — per-beat fade in/out. Beat 1 clears at 0.255 because the
-  footage carries its own burnt-in labels (Marrakech, Route d'Amizmiz,
-  Mirvana Land) that our type would otherwise compete with.
-- `paintOverlays` cloaks the nav, beats and chapter bars over that same
-  stretch, restoring them by 0.600.
+## JavaScript architecture
 
-Seeks are quantised to the source frame grid (`SRC_FPS`) so there is one
-seek per frame that actually changes, not two or three.
+`js/mirvana.js` is one IIFE of independent sub-modules. Non-obvious behaviour:
 
-**Desktop and mobile load different encodes.** The `<video>` ships with no
-`src`; `hero()` picks `data-src-desktop` / `data-src-mobile` (and the
-matching `data-fps-*`) from a `max-width: 820px` media query before anything
-reads the element, so a phone never fetches the 12.9 MB desktop file. Both
-are 720p at CRF 29 — the mobile build differs only in frame count.
+- **Motion is on for every visitor, regardless of `prefers-reduced-motion`.**
+  This is an explicit owner decision. `?motion=reduced` is the only opt-out,
+  and `<html>` gets `.motion-full` otherwise. Any CSS under
+  `@media (prefers-reduced-motion: reduce)` must be scoped to
+  `html:not(.motion-full)`, or its `!important` rules will override GSAP's
+  inline styles and silently kill animations.
+- **`cinematicMotion` rewrites every `h1`/`h2`** into `.word-mask > .word-inner`
+  spans for the word reveal. It copies the text into `aria-label` first and
+  marks the spans `aria-hidden`, so editing heading markup at runtime (or
+  querying heading text in JS) sees the split DOM. `.media` wrappers get
+  scroll parallax; `data-parallax="gentle"` reduces it.
+- **`heroSlideshow`** keeps later slides in `data-src` and only shows a slide
+  after it has loaded. It shuffles through a bag so no slide repeats until all
+  have shown, and stops when the hero is offscreen or the tab is hidden.
+  Slides and dots are matched **by DOM order**, so reorder them together.
+  The 8 slides (`assets/img/hero/slide-N.jpg`) are portrait 1080×1920 in a
+  landscape desktop hero, so each has its own `.hero__slide--sN`
+  `object-position` crop. Slide 1 has text baked into the image that no crop
+  can move off the headline on phones, which is why the page opens on slide 3.
+  On screens ≤540px the dots are hidden (8 × 44px won't fit) and only the
+  pause control remains.
+- **`videos`** sets the `#projectVideo` source from a `max-width: 820px` query
+  (phones get `hero-scroll-m.mp4`), and plays each video only while visible.
+- **`floatingWhatsApp`** hides the fixed WhatsApp button while `#contact` is in
+  view, because the form carries its own WhatsApp action.
+- **The lightbox (inside `gallery`) serves two groups**: the villa témoin
+  photographs and the floor plans (`[data-plan]` buttons in `#visavis`).
+  Whichever opener is used sets the group the arrows step through, so the
+  groups never bleed into each other. Plan thumbnails carry `data-full`
+  (1440px) and `data-caption`; the lightbox always loads the full file,
+  because a thumbnail-sized plan is not legible.
+- **`leadForm`** validates seven required fields, opens WhatsApp synchronously
+  inside the submit handler (so pop-up blockers allow it), and stores a copy in
+  `localStorage` under `mirvana_leads`. Field names and record keys
+  (`nom tel email budget projet delai financement mot recu_le source`) are a
+  contract; keep them stable.
 
-## Motion policy
-
-`MOTION` defaults to **on for every visitor**, deliberately ignoring
-`prefers-reduced-motion`; `?motion=reduced` is the opt-out. This was the
-owner's explicit decision, documented in `site/README.md` along with the
-trade-off. Consequences to respect when editing CSS:
-
-- `<html>` carries `.motion-full` in the default case, so every
-  `@media (prefers-reduced-motion: reduce)` block is scoped to
-  `html:not(.motion-full)`. Unscoped `!important` rules in those blocks will
-  override GSAP's inline styles and silently kill the animation.
-- `.js-scrub` is stamped on `<html>` when the pinned hero engages; the
-  stacked-still hero in CSS is the no-JS fallback only.
+`ENDPOINT` is still `""`, so nothing is recorded server-side until a
+Formspree / Sheets / webhook URL is set there.
 
 ## Design system
 
-Set in `:root`. Worth knowing before adding anything visual:
+Defined at the top of `css/mirvana.css`:
 
-- **One typeface**, Host Grotesk. Hierarchy comes from weight (400 body →
-  800 display) and scale, never a second family.
-- **One accent**, terracotta `#B34E27`. The single exception is the floating
-  WhatsApp button in green, because readers scan for that exact green.
-- **Radius lock: 0** everywhere, including the floating button.
-- **Z-index scale**: 10 / 20 / 30 / 50, via `--z-base` … `--z-top`.
-- Ground is ivory throughout with one deliberate switch to `--night` for the
-  closing form and footer.
-
-Two traps that have already bitten this codebase: `ch` units on a wrapper
-resolve against the wrapper's *sans* font rather than the display face
-inside it (use `rem`), and the copy is informative rather than sloganeering,
-so display sizes are deliberately smaller than they look like they should be.
+- One typeface, Host Grotesk, for everything.
+- **Every section carries exactly one tone class, and neighbours never share
+  one**: `tone-white` `#fff`, `tone-mist` `#eeeef2`, `tone-sand` `#f4ebdf`,
+  `tone-night` `#17181c` (the footer too). Tone classes win on specificity
+  over the older section classes. `.section--dark` on its own still renders
+  light grey — the name predates the tones, so use `tone-night` for dark.
+- `tone-night` redefines `--ink`, `--muted`, `--line` and `--accent-ink` for
+  its subtree, so components that read those variables adapt without
+  per-component overrides; hard-coded colours inside a night section will not.
+  On `tone-sand`, section CTAs switch to graphite because the tan pill barely
+  separates from the ground (the form submit, on its white card, stays tan).
+- `--accent` `#cda16c` is the tan fill for pill buttons, with dark `#261c12`
+  text. Icons, text links and focus rings use `--accent-ink` `#81542f`, because
+  the tan fails contrast as text on white.
+- Radius scale: 12px fields, 24px media and panels (20px on phones), pills for
+  every control.
+- The floating WhatsApp button is fixed bottom-right, so in-media controls
+  (video pause pills) sit bottom-left.
+- Touch targets are held at 44px minimum; nav CTA, hero dots, footer links and
+  the contact phone link were all raised to meet it.
 
 ## Copy
 
-French, direct and factual — concrete numbers over evocation. No em-dashes
-or en-dashes anywhere in user-visible text; use a hyphen or restructure.
+French, direct and factual: concrete numbers over evocation. The starting price
+(405 000 €) appears in the hero, the project section and the form hint.
 
-The price is a word-mask reveal and deliberately **not** a count-up: a
-counting price renders wrong figures on the way to the target, and a wrong
-price should not be on screen even for a second.
+## Testing notes for this machine
 
-## Media pipeline
+- Headless Chrome reports `prefers-reduced-motion: reduce` by default, and this
+  Windows machine does too (animation effects are off). Emulate
+  `no-preference` via CDP `Emulation.setEmulatedMedia` when checking motion.
+- Scripted `window.scrollTo` does not reliably fire ScrollTrigger in an
+  occluded window, where rAF can drop to ~0.1 Hz. Use CDP
+  `Input.dispatchMouseEvent` wheel events.
+- Screenshots taken shortly after scrolling catch entrance animations
+  mid-flight (items offset by up to 75px). Measure spacing with
+  `getBoundingClientRect` under `?motion=reduced` before calling something a
+  layout bug.
+- Launch test browsers with their own `--user-data-dir` and close them via CDP
+  `Browser.close`. **Never kill Chrome by image name** — the owner uses Chrome
+  on this machine.
 
-`build-assets.sh` regenerates everything in `site/assets/` from
-`input Assets/`, which is **gitignored** (~384 MB of frame sequences, render
-exports and show-villa originals) and therefore not recoverable from this
-repo. Keep a local copy.
+## Media
 
-The hero source is a 514-frame JPEG sequence at 720×1280 — that is the
-native resolution, so never scale above it. Show-villa photographs in
-`assets/img/temoin/` are real photographs rather than renders, which is why
-that section's copy says so explicitly.
+`../input Assets/` (~384 MB of frame sequences, renders and show-villa
+originals) is gitignored and not recoverable from the repo. Keep a local copy.
+Photographs in `assets/img/temoin/` are real photographs of the built show
+villa, not renders.
 
-## Before going live
-
-`ENDPOINT` in `site/js/mirvana.js` is still `""`. The form works without it
-(WhatsApp hand-off plus a `localStorage` backup) but nothing is recorded
-server-side until a Formspree / Sheets / webhook URL is set.
+The hero MP4s were encoded all-keyframe (`-g 1`) for a scroll-scrubbed hero
+that has since been retired. The film section now only autoplays and loops, so
+that encode is no longer required, and a normal GOP would be much smaller.

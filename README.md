@@ -1,38 +1,34 @@
-# Mirvana Land — landing page
+# Mirvana Land - landing page
 
-Static landing page for Mirvana Land: 62 single-storey villas near
-Marrakech. French, conversion-oriented, with a scroll-scrubbed aerial hero
-and a qualifying lead form that hands off to WhatsApp.
+Static French landing page for 62 single-storey villas near Marrakech.
+The layout follows the supplied Luxavia reference, refined with an Apple-inspired
+visual style: Host Grotesk throughout, cool white surfaces, warm orange and white actions,
+rounded media, translucent navigation, an automatic image hero and cinematic
+text/parallax motion, with a direct visit inquiry flow.
 
-Everything that ships lives in [`site/`](site/). Start there, and read
-[`site/README.md`](site/README.md) — it documents the hero encode, the
-chapter timings, the motion policy and the deployment requirements.
+Everything that ships lives in `site/`. See `site/README.md` for implementation
+and deployment details.
 
-## Run it locally
+## Local preview
 
 ```bash
 cd site
 node serve.js . 8099
 # http://localhost:8099/
+node --check js/mirvana.js
 ```
 
-`serve.js` implements HTTP byte ranges deliberately. **Any host you deploy
-to must answer `Range:` requests with `206`**, or the browser marks the hero
-video non-seekable and the scroll scrub silently does nothing. Verify with:
-
-```bash
-curl -sI -H "Range: bytes=0-99" https://your-host/assets/hero/hero-scroll.mp4
-```
+No framework, package installation or build step is needed.
+The existing preview server supports HTTP byte ranges for video playback and seeking.
 
 ## Source media
 
-`input Assets/` is **not** in this repo: it is roughly 384 MB of raw frame
-sequences, render exports and show-villa originals. `site/build-assets.sh`
-regenerates everything under `site/assets/` from it, so keep a local copy.
+`input Assets/` is not in this repo. Keep a local copy of the original frame
+sequences, renders and show-villa photographs before regenerating media with
+`site/build-assets.sh`. Self-hosted fonts live separately in `site/assets/fonts/`.
 
-## Before going live
+## Lead delivery
 
-`ENDPOINT` in [`site/js/mirvana.js`](site/js/mirvana.js) is still empty. The
-form works without it (WhatsApp hand-off plus a localStorage backup), but
-nothing is recorded server-side until a Formspree / Sheets / webhook URL is
-set there.
+The qualifying form opens WhatsApp with the answers and retains its existing
+localStorage backup. `ENDPOINT` in `site/js/mirvana.js` is empty; server-side
+lead recording requires a configured JSON POST endpoint.

@@ -4,6 +4,8 @@
 # from this folder, so keep a local copy.
 input Assets/
 New folder/
+# Full-size portrait original; the site ships site/assets/img/zied-barouni*.jpg
+ceo.jpeg
 
 # OS / editor
 Thumbs.db

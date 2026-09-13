@@ -1,0 +1,7 @@
+@font-face {
+  font-family: 'Host Grotesk';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../assets/fonts/host-grotesk.woff2') format('woff2');
+}
