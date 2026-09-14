@@ -610,13 +610,15 @@ html:not(.motion-full) { scroll-behavior: auto; }
 .legal-summary h2 { margin-bottom: 12px; }
 .legal-summary ul { margin-bottom: 0; }
 
-/* Registration facts only the owner can supply. .todo stays visibly
-   unfinished on purpose, so an incomplete page cannot ship unnoticed. */
+/* Identity facts, in the two documents that must state them. */
 .legal-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px 26px; margin: 0 0 16px; font-size: 14px; }
 .legal-facts dt { font-weight: 600; color: var(--ink); }
 .legal-facts dd { margin: 0; color: var(--muted); }
 .legal-facts a { color: var(--accent-ink); }
-.todo { display: inline-block; padding: 1px 9px; background: #f4ebdf; border: 1px dashed #c1a074; border-radius: 999px; color: #6d4a22; font-size: 12px; }
+
+/* A button that has to read as a link, because withdrawing consent must sit
+   in the sentence that describes the right, not in a separate control. */
+.prose-button { font-size: inherit; line-height: inherit; color: var(--accent-ink); text-decoration: underline; text-underline-offset: 4px; }
 
 @media (max-width: 900px) {
   .legal-head { padding-top: 122px; }
@@ -629,4 +631,47 @@ html:not(.motion-full) { scroll-behavior: auto; }
   .legal-toc ol { columns: 1; }
   .legal-facts { grid-template-columns: minmax(0, 1fr); gap: 2px; }
   .legal-facts dd { margin-bottom: 10px; }
+}
+
+
+/* ============================================================
+   Consent banner (js/consent.js)
+   Injected only when GA_ID is set, on all three pages. The two
+   answers are deliberately the same size and the same visual
+   weight: the CNIL requires refusing to cost no more than
+   accepting, so neither may be the quieter control.
+   ============================================================ */
+.consent {
+  position: fixed; z-index: var(--z-top); left: 22px; bottom: 22px;
+  width: min(430px, calc(100vw - 44px));
+  padding: 24px; background: #ffffff; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 24px;
+  box-shadow: 0 18px 50px #10182029;
+}
+.consent h2 { margin-bottom: 10px; font-size: 17px; letter-spacing: -.03em; }
+.consent p { margin-bottom: 18px; font-size: 13px; line-height: 1.6; color: var(--muted); }
+.consent__actions { display: flex; gap: 10px; }
+.consent__btn { flex: 1 1 0; min-width: 0; gap: 0; padding-inline: 14px; }
+.consent__btn[data-consent="denied"] { background: #1d1d1f; color: #ffffff; }
+.consent__btn[data-consent="denied"]:hover { background: #34343a; }
+.consent__link { margin: 14px 0 0; font-size: 12px; }
+.consent__link a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 4px; }
+.motion-full .consent { animation: consent-in 320ms ease both; }
+@keyframes consent-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+
+/* Footer control that reopens the question. Hidden by consent.js while no
+   measurement id is configured, since there is then nothing to manage. */
+.consent-toggle { border: 0; background: none; padding: 0; font: inherit; color: inherit; text-decoration: none; }
+.foot .consent-toggle:hover { color: var(--accent); }
+
+/* The banner covers the hero slideshow's pause control. Moving that control
+   would drop it onto the headline at phone width, so instead the slideshow
+   stops while the question is up (consent.js fires mirvana:consent, and
+   heroSlideshow holds). Nothing here needs to move.
+
+   Below this width the banner also spans the screen and would bury the
+   floating WhatsApp button, bottom-right. The banner wins while it is open. */
+@media (max-width: 820px) {
+  .consent { left: 12px; right: 12px; bottom: 12px; width: auto; padding: 20px; border-radius: 20px; }
+  html.consent-open .wa-float { opacity: 0; visibility: hidden; pointer-events: none; }
 }

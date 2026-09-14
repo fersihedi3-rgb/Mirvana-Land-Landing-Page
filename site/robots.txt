@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Development files. They are not linked from anywhere, and a correct deploy
+# does not upload them at all, but a crawler should not index them if it does.
+Disallow: /serve.js
+Disallow: /build-assets.sh
+Disallow: /README.md
+
+Sitemap: https://mirvana-land.com/sitemap.xml

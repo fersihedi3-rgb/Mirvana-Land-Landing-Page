@@ -115,13 +115,68 @@ not the lot sold, plan dimensions are indicative, and "à partir de 405 000 €"
 a starting price rather than an offer.
 
 Registration facts that are not knowable from the repo — raison sociale, forme
-juridique, capital, siège social, RC/ICE/IF, directeur de la publication, contact
-e-mail and hébergeur — are marked `<span class="todo">À compléter</span>`
-(6 in the privacy policy, 8 in the terms). The pill is styled to look unfinished
-so it cannot ship unnoticed. Fill these before going live; do not invent them.
+juridique, capital, siège social, RC/ICE/IF, directeur de la publication and
+hébergeur — are not published. Both pages state that they are given on request,
+and the phone number is the working contact channel for data requests. To
+publish them later, extend the `.legal-facts` list in each page and drop that
+sentence.
 
-Checked at 360, 768 and 1440 pixels: no horizontal overflow, no console error,
-every internal link and every table-of-contents anchor resolves.
+## SEO
+
+Canonical host `https://mirvana-land.com`, hardcoded in `index.html`, both legal
+pages, `sitemap.xml` and `robots.txt`. Changing domain is a find-and-replace
+across those five files.
+
+Every page carries a canonical link, Open Graph and Twitter card tags with an
+**absolute** `og:image` (the previous relative path broke every link preview),
+`theme-color`, the favicon set and `site.webmanifest`. `index.html` adds a
+JSON-LD `@graph`: `Organization`, `WebSite` and a `Product` with an
+`AggregateOffer` at `lowPrice` 405 000 EUR. Deliberately absent: rating,
+`offerCount` and geo coordinates, none of which are known.
+
+`assets/img/og-image.jpg` (1200×630), `icon-512.png`, `icon-192.png`,
+`favicon-32.png` and `apple-touch-icon.png` are generated with ffmpeg from
+`firepit.jpg` and `logo-lock.png`. The icons come from the monogram inside
+`logo-lock.png`, not from `logo-mono.png`, whose glyph is cropped off its own
+canvas.
+
+## Measurement
+
+`js/consent.js` holds `GA_ID`, currently empty. Empty means no Google tag, no
+cookie, no banner and no third-party request on any page — the state the site
+ships in. Setting it to a `G-XXXXXXXXXX` turns measurement on everywhere.
+
+The consent gate follows the CNIL rules rather than approximating them. Consent
+Mode v2 defaults are queued as denied before a tag can exist. "Refuser" and
+"Accepter" are the same size and weight; Escape counts as a refusal; refusals
+are kept 182 days then asked once more; acceptance holds until withdrawn from
+"Gérer mes cookies" in the footer or inside section 10 of the privacy policy.
+Advertising features and Google signals are switched off even after acceptance.
+The `generate_lead` event carries budget, projet, delai and financement only —
+never name, phone, e-mail or the free-text message.
+
+Elements marked `data-consent-scope` show only when `GA_ID` is set, and
+`data-consent-scope="off"` only when it is empty. That is what lets section 8 of
+the privacy policy state that measurement is currently inactive without anyone
+remembering to edit it when the id is filled in.
+
+The banner covers the hero slideshow's pause control, so the slideshow holds
+still while the question is on screen instead of moving under a control the
+visitor cannot reach.
+
+## Verification
+
+Checked in headless Chromium at 360, 768 and 1440 pixels across all three pages:
+no horizontal overflow, no console error, exactly one `h1` per page, every
+internal link and table-of-contents anchor resolving, zero third-party requests
+and zero cookies in the shipped state, and byte ranges still answering `206`.
+
+The consent gate has a 20-assertion behaviour test covering first visit,
+refusal, persistence, reopening, acceptance loading `gtag.js`, Escape, and the
+legal pages. The lead handoff is tested end to end with `window.open`
+intercepted, asserting the pre-filled WhatsApp message carries all seven
+answers and that the record keys are unchanged. No message reaches the sales
+team during these tests.
 
 ## Assets
 

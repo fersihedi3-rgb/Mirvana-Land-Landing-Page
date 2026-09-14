@@ -52,6 +52,13 @@
     var slides = Array.from(hero.querySelectorAll('.hero__slide'));
     var dots = Array.from(hero.querySelectorAll('[data-slide]'));
     var pause = document.getElementById('heroPause');
+    // `paused` is the visitor's own choice and owns the button label; `visible`
+    // belongs to the observer; `blocked` is for anything that covers the hero,
+    // currently only the consent banner sitting over the pause control.
+    // consent.js is a deferred script that runs before this one, so its banner
+    // may already be up by now: read the class rather than wait for the event
+    // that has, in that case, already been dispatched.
+    var blocked = document.documentElement.classList.contains('consent-open');
     var index = 0, timer = null, visible = true, paused = !MOTION, request = 0;
     var bag = [];
     hero.querySelector('.hero__controls').hidden = false;
@@ -61,7 +68,7 @@
     }
     function schedule() {
       clearTimeout(timer);
-      if (!visible || paused || document.hidden) return;
+      if (!visible || paused || blocked || document.hidden) return;
       timer = setTimeout(function () {
         if (!bag.length) bag = slides.map(function (_, i) { return i; }).filter(function (i) { return i !== index; }).sort(function () { return Math.random() - .5; });
         show(bag.pop(), false);
@@ -72,7 +79,7 @@
       var ticket = ++request;
       var slide = slides[next];
       function activate() {
-        if (ticket !== request || (!manual && (paused || !visible || document.hidden))) { schedule(); return; }
+        if (ticket !== request || (!manual && (paused || !visible || blocked || document.hidden))) { schedule(); return; }
         index = next;
         slides.forEach(function (el, i) { el.classList.toggle('is-active', i === index); });
         dots.forEach(function (dot, i) { dot.classList.toggle('is-active', i === index); dot.setAttribute('aria-pressed', String(i === index)); });
@@ -90,6 +97,12 @@
     dots.forEach(function (dot) { dot.addEventListener('click', function () { bag = []; show(Number(dot.dataset.slide), true); }); });
     pause.addEventListener('click', function () { paused = !paused; label(); schedule(); });
     document.addEventListener('visibilitychange', schedule);
+    // The consent banner covers the pause control, so the slideshow holds
+    // still while the question is on screen rather than moving under a
+    // control the visitor cannot reach.
+    document.addEventListener('mirvana:consent', function (e) {
+      blocked = !!(e.detail && e.detail.open); schedule();
+    });
     if ('IntersectionObserver' in window) new IntersectionObserver(function (entries) { visible = entries[0].isIntersecting; schedule(); }, { threshold: .1 }).observe(hero);
     label(); schedule();
   })();
@@ -319,6 +332,15 @@
       } catch (err) { /* WhatsApp remains available if browser storage is disabled. */ }
       if (ENDPOINT) {
         fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(data) }).catch(function () {});
+      }
+      // The conversion worth measuring. A no-op unless the visitor accepted
+      // measurement, so it carries the qualifying answers but never the
+      // identifying ones: no name, phone, email or free-text message.
+      if (window.mirvanaConsent) {
+        window.mirvanaConsent.track('generate_lead', {
+          budget: data.budget, projet: data.projet,
+          delai: data.delai, financement: data.financement
+        });
       }
       form.hidden = true; done.hidden = false;
       done.focus({ preventScroll: true });
