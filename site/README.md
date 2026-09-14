@@ -80,7 +80,48 @@ The record keys remain:
 
 To record leads server-side, configure `ENDPOINT` with a service accepting a
 JSON POST. Until then, the team receives the inquiry when the visitor sends
-the prepared WhatsApp message.
+the prepared WhatsApp message. Doing so also invalidates section 4 of the
+privacy policy, which currently states that nothing is sent to a server.
+
+The submit hint names the privacy policy and links to it, so the visitor is
+informed where the data is actually collected. The seven required fields and
+the record keys are unchanged by that addition.
+
+## Legal pages
+
+`confidentialite.html` (politique de confidentialité) and `conditions.html`
+(conditions d'utilisation, including the mentions légales) sit beside
+`index.html` and are linked from the footer of all three pages.
+
+Both are plain documents: shared stylesheet, a sticky numbered table of
+contents beside a 68ch prose column, an "En bref" summary panel first, then
+twelve sections. They deliberately do not load `js/mirvana.js` — `navigation()`
+and `heroSlideshow()` are not null-guarded and throw without `#menuToggle` and
+`#hero` — so their header is static, carries `.is-solid` in the markup, and
+points at `index.html#…`. The one inline line that fills `#year` is the only
+script. Styles live in a `Legal pages` block at the end of `css/mirvana.css`.
+
+The privacy policy describes what the site actually does rather than boilerplate:
+the form opens WhatsApp and nothing reaches us until the visitor sends the
+message; a copy stays in `mirvana_leads` on their own device; no cookie, no
+analytics, no third-party request on load, since fonts, GSAP and media are all
+self-hosted. It covers both the GDPR (visitors in France) and the Moroccan law
+09-08, and states plainly that answering a request means transferring data to
+Morocco, which has no EU adequacy decision.
+
+The terms page carries the non-contractual wording a promoter needs: renders are
+intentions and not the delivered state, the villa témoin photographs are real but
+not the lot sold, plan dimensions are indicative, and "à partir de 405 000 €" is
+a starting price rather than an offer.
+
+Registration facts that are not knowable from the repo — raison sociale, forme
+juridique, capital, siège social, RC/ICE/IF, directeur de la publication, contact
+e-mail and hébergeur — are marked `<span class="todo">À compléter</span>`
+(6 in the privacy policy, 8 in the terms). The pill is styled to look unfinished
+so it cannot ship unnoticed. Fill these before going live; do not invent them.
+
+Checked at 360, 768 and 1440 pixels: no horizontal overflow, no console error,
+every internal link and every table-of-contents anchor resolves.
 
 ## Assets
 

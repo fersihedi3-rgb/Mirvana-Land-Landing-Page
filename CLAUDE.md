@@ -4,9 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A single-page French landing site for Mirvana Land, 62 single-storey villas
-near Marrakech. Static: no build step, no framework, no package.json, no
-runtime CDN. Everything that ships is in `site/`: `index.html`,
+A French landing site for Mirvana Land, 62 single-storey villas near
+Marrakech: one page that sells, plus two legal pages. Static: no build step,
+no framework, no package.json, no runtime CDN. Everything that ships is in
+`site/`: `index.html`, `confidentialite.html`, `conditions.html`,
 `css/mirvana.css`, `css/fonts.css`, `js/mirvana.js`, and locally hosted
 vendor files (GSAP 3.12.5 + ScrollTrigger in `assets/vendor/`, Host Grotesk in
 `assets/fonts/`, a Tabler outline icon sprite in `assets/icons/features.svg`).
@@ -60,6 +61,28 @@ Headings follow one pattern that the motion code relies on:
 Icons are referenced from the sprite, never inlined:
 `<svg class="feature-icon"><use href="assets/icons/features.svg#pool"></use></svg>`.
 
+## Legal pages
+
+`site/confidentialite.html` and `site/conditions.html` are the only pages
+besides `index.html`. They share `css/mirvana.css` (a `Legal pages` block at
+the end of it) but **must not load `js/mirvana.js`**: `navigation()` and
+`heroSlideshow()` are not null-guarded and throw without `#menuToggle` /
+`#hero`. Their nav is therefore static, carries `.is-solid` in the markup
+(its translucent state sits near 4:1 over white instead of over the dark
+hero), and links to `index.html#…`, never to a bare fragment. The only
+script on them is the one line that fills `#year`.
+
+The pages describe the form's real behaviour — WhatsApp handoff, the
+`mirvana_leads` localStorage copy, no cookies and no third-party requests.
+**If `ENDPOINT` is ever set, section 4 of the privacy policy and its
+"En bref" box stop being true** and must be updated in the same change.
+
+Company registration facts nobody in the repo knows (raison sociale, RC/ICE/IF,
+siège social, capital, directeur de la publication, contact e-mail, hébergeur)
+are marked `<span class="todo">À compléter</span>`. The `.todo` pill is styled
+to look unfinished on purpose so an incomplete page can't ship unnoticed; don't
+invent values to clear them.
+
 ## JavaScript architecture
 
 `js/mirvana.js` is one IIFE of independent sub-modules. Non-obvious behaviour:
@@ -102,7 +125,8 @@ Icons are referenced from the sprite, never inlined:
   contract; keep them stable.
 
 `ENDPOINT` is still `""`, so nothing is recorded server-side until a
-Formspree / Sheets / webhook URL is set there.
+Formspree / Sheets / webhook URL is set there. Setting it also makes the
+privacy policy inaccurate — see **Legal pages** above.
 
 ## Design system
 

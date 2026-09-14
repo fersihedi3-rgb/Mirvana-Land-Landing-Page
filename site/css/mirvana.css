@@ -552,3 +552,81 @@ html:not(.motion-full) { scroll-behavior: auto; }
   .hero__selectors { display: none; }
   .hero__pause { border-left: 0; padding-inline: 14px; }
 }
+
+
+/* ============================================================
+   Legal pages: confidentialite.html and conditions.html
+   Standalone documents that share this stylesheet but deliberately
+   do NOT load js/mirvana.js: navigation() and heroSlideshow() are not
+   null-guarded and throw without #menuToggle / #hero. Consequences:
+     - the nav carries .is-solid in the markup, since nothing is left
+       to toggle it on scroll, and its translucent state would sit at
+       roughly 4:1 against white instead of over the dark hero;
+     - headings are not split into .word-mask spans, so these pages
+       need no motion-specific rules.
+   Nav anchors point at index.html#..., never at bare fragments.
+   ============================================================ */
+.nav__in--legal { grid-template-columns: auto 1fr auto; }
+.nav__in--legal .nav__cta { grid-column: 3; }
+
+/* The lead form must name the privacy policy at the point of collection,
+   so its hint carries the only link inside the form. */
+.form .hint a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+
+.legal-head { background: #f4ebdf; padding-block: 148px clamp(50px, 6vw, 76px); }
+.legal-head .eyebrow { margin-bottom: 18px; }
+.legal-head .eyebrow a { text-decoration: underline; text-underline-offset: 4px; }
+.legal-head h1 { font-size: clamp(34px, 3.6vw, 54px); max-width: 16ch; margin-bottom: 22px; }
+.legal-head > .shell > p:not(.eyebrow) { color: var(--muted); max-width: 62ch; }
+.legal-head__meta { margin-top: 26px; font-size: 12px; }
+.legal-head__meta a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 4px; }
+
+.legal-body { background: #ffffff; padding-block: clamp(54px, 6vw, 86px); }
+.legal-grid { display: grid; grid-template-columns: 226px minmax(0, 1fr); gap: clamp(34px, 5vw, 74px); align-items: start; }
+
+/* scroll-padding-top on html already clears the fixed bar for these links. */
+.legal-toc { position: sticky; top: 108px; font-size: 12px; }
+.legal-toc > p { margin-bottom: 12px; font-weight: 600; }
+.legal-toc ol { margin: 0; padding: 0; list-style: none; counter-reset: toc; }
+.legal-toc li { counter-increment: toc; }
+.legal-toc a { display: flex; gap: 8px; padding: 9px 0; color: var(--muted); border-top: 1px solid var(--line); }
+.legal-toc a::before { content: counter(toc) "."; color: var(--accent-ink); font-variant-numeric: tabular-nums; }
+.legal-toc a:hover { color: var(--accent-ink); }
+
+.prose { max-width: 68ch; }
+.prose section + section { margin-top: clamp(38px, 4vw, 56px); }
+.prose h2 { font-size: clamp(21px, 1.75vw, 26px); letter-spacing: -.035em; margin-bottom: 14px; }
+.prose h3 { margin: 26px 0 8px; font-size: 15px; font-weight: 600; }
+.prose p { margin-bottom: 14px; color: var(--muted); }
+.prose ul { margin: 0 0 16px; padding-left: 20px; color: var(--muted); }
+.prose li { margin-bottom: 8px; }
+.prose li::marker { color: var(--accent-ink); }
+.prose strong { color: var(--ink); font-weight: 600; }
+.prose a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 4px; }
+.prose code { padding: 2px 6px; background: #eeeef2; border-radius: 6px; font-size: 13px; }
+
+/* The short answer, before the twelve sections that justify it. */
+.legal-summary { margin-bottom: clamp(38px, 4vw, 56px); padding: clamp(22px, 3vw, 32px); background: #eeeef2; border-radius: 24px; }
+.legal-summary h2 { margin-bottom: 12px; }
+.legal-summary ul { margin-bottom: 0; }
+
+/* Registration facts only the owner can supply. .todo stays visibly
+   unfinished on purpose, so an incomplete page cannot ship unnoticed. */
+.legal-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px 26px; margin: 0 0 16px; font-size: 14px; }
+.legal-facts dt { font-weight: 600; color: var(--ink); }
+.legal-facts dd { margin: 0; color: var(--muted); }
+.legal-facts a { color: var(--accent-ink); }
+.todo { display: inline-block; padding: 1px 9px; background: #f4ebdf; border: 1px dashed #c1a074; border-radius: 999px; color: #6d4a22; font-size: 12px; }
+
+@media (max-width: 900px) {
+  .legal-head { padding-top: 122px; }
+  .legal-grid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .legal-toc { position: static; top: auto; }
+  .legal-toc ol { columns: 2; column-gap: 26px; }
+  .legal-summary { border-radius: 20px; }
+}
+@media (max-width: 560px) {
+  .legal-toc ol { columns: 1; }
+  .legal-facts { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .legal-facts dd { margin-bottom: 10px; }
+}
